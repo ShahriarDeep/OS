@@ -1,0 +1,90 @@
+#include<iostream>
+using namespace std;
+
+struct process
+{
+    int pid;
+    int ArrivalTime;
+    int BurstTime;
+    int CompletionTime;
+    int TurnAroundTime;
+    int WaitingTime;
+};
+
+void makeCompletionTime(process proc[],int n)
+{
+    proc[0].CompletionTime=proc[0].BurstTime;
+    for(int i=1; i<n; i++)
+    {
+        proc[i].CompletionTime=proc[i-1].CompletionTime + proc[i].BurstTime;
+    }
+}
+
+void makeTurnAroundTime(process proc[],int n)
+{
+    for(int i=0; i<n; i++)
+    {
+        proc[i].TurnAroundTime=proc[i].CompletionTime - proc[i].ArrivalTime;
+    }
+}
+
+void makeWaitingTime(process proc[],int n)
+{
+    proc[0].WaitingTime=0;
+    for(int i=1; i<n; i++)
+    {
+        proc[i].WaitingTime=proc[i].TurnAroundTime - proc[i].BurstTime;
+    }
+}
+
+void FindFCFS(process proc[],int n)
+{
+    makeCompletionTime(proc,n);
+    makeTurnAroundTime(proc,n);
+    makeWaitingTime(proc,n);
+}
+
+void printFCFS(process proc[],int n)
+{
+    cout<<"FCFS Sceduling: "<<endl;
+
+    cout<<"PID\tArrivalTime\tBurstTime\tCompletionTime\tTurnAroundTime\tWaitingTime"<<endl;
+
+    for(int i=0; i<n; i++)
+    {
+        cout<<proc[i].pid<<"\t\t"<<proc[i].ArrivalTime<<"\t\t"<<proc[i].BurstTime<<"\t\t"<<proc[i].CompletionTime
+        <<"\t\t"<<proc[i].TurnAroundTime<<"\t\t"<<proc[i].WaitingTime<<endl;
+    }
+}
+
+int main()
+{
+    cout<<"Enter the number of process: ";
+    int n;
+    cin>>n;
+
+    process proc[n];
+
+    cout<<"Enter process ID, arrival time, burst time for each process: "<<endl;
+
+    for(int i=0; i<n; i++)
+    {
+        cin>>proc[i].pid>>proc[i].ArrivalTime>>proc[i].BurstTime;
+    }
+    FindFCFS(proc,n);
+    printFCFS(proc,n);
+
+    int swt=0;
+    float awt;
+
+    for(int i=0; i<n; i++)
+    {
+        swt=swt+proc[i].WaitingTime;
+    }
+
+    awt=swt/n;
+
+    cout<<"Avg waiting time is :"<<awt<<endl;
+
+    return 0;
+}
