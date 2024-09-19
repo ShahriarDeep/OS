@@ -1,0 +1,92 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+
+using namespace std;
+
+struct Process {
+    int at, bt, ct, ta, wt, btt;
+    string pro_id;
+};
+
+bool compareArrival(const Process &a, const Process &b) {
+    return a.at < b.at;
+}
+
+bool compareBurst(const Process &a, const Process &b) {
+    return a.bt < b.bt;
+}
+
+int main() {
+    vector<Process> pro;
+    int n;
+
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    cout << "Enter the Process ID, Arrival Time, and Burst Time:" << endl;
+    for (int i = 0; i < n; i++) {
+        Process p;
+        cin >> p.pro_id >> p.at >> p.bt;
+        p.btt = p.bt;  // Save original burst time
+        pro.push_back(p);
+    }
+
+    sort(pro.begin(), pro.end(), compareArrival);  // Sort by arrival time
+
+    int currentTime = 0, completedProcesses = 0;
+    float totalTAT = 0, totalWT = 0;
+
+    while (completedProcesses < n) {
+        vector<Process*> readyQueue;
+
+        // Collect processes that have arrived and are not completed
+        for (auto &p : pro) {
+            if (p.at <= currentTime && p.bt > 0) {
+                readyQueue.push_back(&p);
+            }
+        }
+
+        if (!readyQueue.empty()) {
+            // Sort readyQueue by burst time (SJF)
+            sort(readyQueue.begin(), readyQueue.end(), [](Process* a, Process* b) {
+                return a->bt < b->bt;
+            });
+
+            Process* currentProcess = readyQueue.front(); // Get the process with the smallest burst time
+            currentProcess->bt--;  // Process the current task
+            currentTime++;         // Increment current time
+
+            // If the process is completed
+            if (currentProcess->bt == 0) {
+                currentProcess->ct = currentTime;
+                currentProcess->ta = currentProcess->ct - currentProcess->at;  // Turnaround time
+                currentProcess->wt = currentProcess->ta - currentProcess->btt; // Waiting time
+                totalTAT += currentProcess->ta;  // Total turnaround time
+                totalWT += currentProcess->wt;    // Total waiting time
+                completedProcesses++;             // Increment completed processes
+            }
+        } else {
+            currentTime++; // If no process is ready, increment time
+        }
+    }
+
+    // Output process IDs
+    cout << "Process IDs: ";
+    for (int i = 0; i < n; i++) {
+        cout << pro[i].pro_id;
+        if (i < n - 1) {
+            cout << ", "; // Add a comma separator
+        }
+    }
+    cout << endl;
+
+    float avgWT = totalWT / n;
+
+    // Output the average waiting time
+    cout << fixed << setprecision(2);
+    cout << "Average Waiting Time (WT): " << avgWT << endl;
+
+    return 0;
+}
