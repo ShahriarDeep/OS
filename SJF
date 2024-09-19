@@ -1,0 +1,91 @@
+#include<iostream>
+using namespace std;
+
+struct process
+{
+    int pid;
+    int ArrivalTime;
+    int BurstTime;
+    int CompletionTime;
+    int TurnAroundTime;
+    int WaitingTime;
+};
+
+void findSJf(process proc[],int n)
+{
+    int remainingtime[n];
+    for(int i=0; i<n; i++)
+    {
+        remainingtime[i]=proc[i].BurstTime;
+    }
+    int currtime=0;
+    int complete=0;
+    int shortest=0;
+    int minbrust=9999;
+    while(complete<n)
+    {
+        minbrust=9999;
+        for(int i=0; i<n; i++)
+        {
+            if(proc[i].ArrivalTime<=currtime && remainingtime[i]<minbrust && remainingtime[i]>0)
+            {
+                minbrust=remainingtime[i];
+                shortest=i;
+            }
+        }
+        remainingtime[shortest]--;
+        if(remainingtime[shortest]==0)
+        {
+            complete++;
+            proc[shortest].CompletionTime=currtime+1;
+            proc[shortest].TurnAroundTime=proc[shortest].CompletionTime-proc[shortest].ArrivalTime;
+            proc[shortest].WaitingTime=proc[shortest].TurnAroundTime-proc[shortest].BurstTime;
+        }
+        currtime++;
+    }
+}
+
+void printFCFS(process proc[],int n)
+{
+    cout<<"FCFS Sceduling: "<<endl;
+
+    cout<<"PID\tArrivalTime\tBurstTime\tCompletionTime\tTurnAroundTime\tWaitingTime"<<endl;
+
+    for(int i=0; i<n; i++)
+    {
+        cout<<proc[i].pid<<"\t\t"<<proc[i].ArrivalTime<<"\t\t"<<proc[i].BurstTime<<"\t\t"<<proc[i].CompletionTime
+        <<"\t\t"<<proc[i].TurnAroundTime<<"\t\t"<<proc[i].WaitingTime<<endl;
+    }
+}
+
+int main()
+{
+    cout<<"Enter the number of process: ";
+    int n;
+    cin>>n;
+
+    process proc[n];
+
+    cout<<"Enter process ID, arrival time, burst time for each process: "<<endl;
+
+    for(int i=0; i<n; i++)
+    {
+        cin>>proc[i].pid>>proc[i].ArrivalTime>>proc[i].BurstTime;
+    }
+    findSJf(proc,n);
+    printFCFS(proc,n);
+
+    int swt=0;
+    float awt;
+
+    for(int i=0; i<n; i++)
+    {
+        swt=swt+proc[i].WaitingTime;
+    }
+
+    awt=swt/n;
+
+    cout<<"Avg waiting time is :"<<awt<<endl;
+
+    return 0;
+}
